@@ -41,6 +41,7 @@ func (dus *datastoreUserStore) CreateUser(username, password string) (*User, err
 	}
 
 	// create salt and hashed password
+	user.Name = username
 	user.Salt = makeSalt()
 	user.HashPass = applySaltAndHash(password, user.Salt)
 
