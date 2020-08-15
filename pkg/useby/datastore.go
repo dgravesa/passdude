@@ -1,4 +1,4 @@
-package passdude
+package useby
 
 import (
 	"context"
@@ -16,7 +16,7 @@ type datastoreUser struct {
 	HashPass string
 }
 
-const datastoreUserKind = "Passdude Users"
+const datastoreUserKind = "useby/users"
 
 // NewDatastoreClient creates a new GCP Datastore user store instance
 func NewDatastoreClient(projectID string) (Client, error) {

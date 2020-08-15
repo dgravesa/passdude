@@ -1,4 +1,4 @@
-package passdude
+package useby
 
 import (
 	"crypto/rand"

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/dgravesa/passdude/pkg/passdude"
+	"github.com/dgravesa/useby/pkg/useby"
 )
 
 func main() {
@@ -37,18 +37,17 @@ func main() {
 	}
 
 	// initialize client
-	client, err := passdude.NewDatastoreClient(projectID)
+	client, err := useby.NewDatastoreClient(projectID)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 
-	// authenticate user
-	user, err := client.Authenticate(username, password)
+	user, err := client.CreateUser(username, password)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	} else {
-		fmt.Println("user authenticated successfully:", user.Name)
+		fmt.Println("new user created successfully:", user.Name)
 	}
 }

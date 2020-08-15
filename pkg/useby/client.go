@@ -1,4 +1,4 @@
-package passdude
+package useby
 
 // Client is used to manage and authenticate users
 type Client interface {

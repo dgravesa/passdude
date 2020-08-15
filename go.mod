@@ -1,4 +1,4 @@
-module github.com/dgravesa/passdude
+module github.com/dgravesa/useby
 
 go 1.14
 
