@@ -1,8 +1,10 @@
 package useby
 
+import "context"
+
 // Client is used to manage and authenticate users
 type Client interface {
-	CreateUser(username, password string) (*User, error)
-	Authenticate(username, password string) (*User, error)
-	DeleteUser(username string) error
+	PutUser(ctx context.Context, username, password string) error
+	Authenticate(ctx context.Context, username, password string) error
+	DeleteUser(ctx context.Context, username string) error
 }

@@ -10,8 +10,7 @@ type datastoreUserStore struct {
 	projectID string
 }
 
-type datastoreUser struct {
-	User
+type userCredentials struct {
 	Salt     string
 	HashPass string
 }
@@ -25,65 +24,63 @@ func NewDatastoreClient(projectID string) (Client, error) {
 	return dus, nil
 }
 
-// CreateUser creates a user with the username and hashed password and stores in datastore
-func (dus *datastoreUserStore) CreateUser(username, password string) (*User, error) {
-	client, err := datastore.NewClient(context.Background(), dus.projectID)
+// PutUser creates user credentials and stores in datastorex
+func (dus *datastoreUserStore) PutUser(ctx context.Context, username, password string) error {
+	client, err := datastore.NewClient(ctx, dus.projectID)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	var user datastoreUser
+	var credentials userCredentials
 	key := datastore.NameKey(datastoreUserKind, username, nil)
 
-	// verify user does not already exist
-	if err := client.Get(context.Background(), key, &user); err != datastore.ErrNoSuchEntity {
-		return nil, err
+	// verify credentials do not already exist for user
+	err = client.Get(ctx, key, &credentials)
+	if err != datastore.ErrNoSuchEntity {
+		return err
 	}
 
 	// create salt and hashed password
-	user.Name = username
-	user.Salt = makeSalt()
-	user.HashPass = applySaltAndHash(password, user.Salt)
+	credentials.Salt = makeSalt()
+	credentials.HashPass = applySaltAndHash(password, credentials.Salt)
 
 	// push new user
-	if _, err := client.Put(context.Background(), key, &user); err != nil {
-		return nil, err
-	}
-
-	return &user.User, nil
+	_, err = client.Put(ctx, key, &credentials)
+	return err
 }
 
 // DeleteUser deletes a user with the given username
-func (dus *datastoreUserStore) DeleteUser(username string) error {
-	client, err := datastore.NewClient(context.Background(), dus.projectID)
+func (dus *datastoreUserStore) DeleteUser(ctx context.Context, username string) error {
+	client, err := datastore.NewClient(ctx, dus.projectID)
 	if err != nil {
 		return err
 	}
 
 	key := datastore.NameKey(datastoreUserKind, username, nil)
-	return client.Delete(context.Background(), key)
+	return client.Delete(ctx, key)
 }
 
-func (dus *datastoreUserStore) Authenticate(username, password string) (*User, error) {
-	client, err := datastore.NewClient(context.Background(), dus.projectID)
+// Authenticate validates user credentials against those in datastore
+func (dus *datastoreUserStore) Authenticate(ctx context.Context, username, password string) error {
+	client, err := datastore.NewClient(ctx, dus.projectID)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	var user datastoreUser
+	var credentials userCredentials
 	key := datastore.NameKey(datastoreUserKind, username, nil)
 
-	// get user from datastore
-	err = client.Get(context.Background(), key, &user)
+	// get hashed credentials from datastore
+	err = client.Get(ctx, key, &credentials)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// validate user password
-	reqHashPass := applySaltAndHash(password, user.Salt)
-	if reqHashPass != user.HashPass {
-		return nil, ErrInvalidLogin
+	reqHashPass := applySaltAndHash(password, credentials.Salt)
+	if reqHashPass != credentials.HashPass {
+		return ErrInvalidLogin
 	}
 
-	return &user.User, nil
+	return nil
 }

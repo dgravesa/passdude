@@ -44,11 +44,10 @@ func main() {
 		os.Exit(1)
 	}
 
-	// authenticate user
-	if err := client.Authenticate(context.Background(), username, password); err != nil {
+	if err := client.PutUser(context.Background(), username, password); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	} else {
-		fmt.Println("user authenticated successfully:", username)
+		fmt.Println("new user created successfully:", username)
 	}
 }

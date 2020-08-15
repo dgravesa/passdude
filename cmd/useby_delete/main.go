@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"os"
@@ -10,11 +11,10 @@ import (
 
 func main() {
 	var projectID string
-	var username, password string
+	var username string
 
 	flag.StringVar(&projectID, "projectID", "", "GCP project ID")
-	flag.StringVar(&username, "username", "", "Name of user to create")
-	flag.StringVar(&password, "password", "", "Password of user to create")
+	flag.StringVar(&username, "username", "", "Name of user to delete")
 	flag.Parse()
 
 	// validate command line arguments
@@ -24,9 +24,6 @@ func main() {
 	}
 	if username == "" {
 		errs = append(errs, "username is required")
-	}
-	if password == "" {
-		errs = append(errs, "password is required")
 	}
 
 	if len(errs) > 0 {
@@ -43,11 +40,10 @@ func main() {
 		os.Exit(1)
 	}
 
-	user, err := client.CreateUser(username, password)
-	if err != nil {
+	if err := client.DeleteUser(context.Background(), username); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	} else {
-		fmt.Println("new user created successfully:", user.Name)
+		fmt.Println("user deleted successfully:", username)
 	}
 }
